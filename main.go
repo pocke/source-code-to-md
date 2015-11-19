@@ -10,7 +10,7 @@ import (
 
 func main() {
 	for _, fname := range os.Args[1:] {
-		err := Translate(fname, os.Stdin)
+		err := Translate(fname, os.Stdout)
 		if err != nil {
 			panic(err)
 		}
@@ -21,7 +21,7 @@ func Translate(fname string, w io.Writer) error {
 	lang := FnameToLang(fname)
 	fmt.Fprintf(w, "- %s\n\n```%s\n", fname, lang)
 
-	defer fmt.Fprint(w, "```\n")
+	defer fmt.Fprint(w, "\n```\n\n")
 
 	b, err := ioutil.ReadFile(fname)
 	if err != nil {
@@ -33,11 +33,17 @@ func Translate(fname string, w io.Writer) error {
 }
 
 func FnameToLang(fname string) string {
-	ext := filepath.Ext(fname)[1:]
-	switch ext {
+	if fname == "Makefile" {
+		return "make"
+	}
+	ext := filepath.Ext(fname)
+	if ext == "" {
+		return ""
+	}
+	switch ext[1:] {
 	case "js":
 		return "javascript"
 	default:
-		return ext
+		return ext[1:]
 	}
 }
